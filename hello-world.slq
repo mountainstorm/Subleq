@@ -1,0 +1,66 @@
+;
+; hello-world.slq
+; subleq
+;
+; Created by R J Cooper on 10/09/2011.
+; Copyright 2011 Mountainstorm. All rights reserved.
+;
+; a basic test of the assembler/machine but with some basic
+; processor features added e.g registers
+;
+; it will derive the address of printf, then call it to 
+; print "Hello World"
+;
+
+jmp main
+
+.fill		1024
+stack:
+
+main:
+; setup sp
+mov .offset stack, sp
+
+;
+; find printf - dysym(RTLD_DEFAULT, "printf")
+;
+
+; push real address of "printf"
+mov .offset printfStr, r0
+add bar, r0
+push r0
+
+; push RTLD_DEFAULT
+push -2
+
+; push address and call out to it
+push dlsym
+callc
+mov [sp], printf
+
+; reset sp
+mov .offset stack, sp
+
+;
+; call printf - printf("Hello World")
+;
+
+; push helloStr
+mov .offset helloStr, r0
+add bar, r0
+push r0
+
+; push address and call out to it
+push printf
+callc
+
+halt
+
+Z: 			.int 		0
+r0:			.int 		0
+sp: 		.int 		0
+bar: 		.int 		0
+dlsym: 		.int 		0
+printf:		.int		0
+helloStr:	.ascii		"Hello World"
+printfStr:	.ascii		"printf"
